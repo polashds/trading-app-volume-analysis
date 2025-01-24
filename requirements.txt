@@ -1,0 +1,7 @@
+flask
+sqlalchemy
+requests
+plotly
+pandas
+celery
+redis
