@@ -1,0 +1,74 @@
+<!-- templates/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Stock Volume Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .positive { background-color: lightgreen; }
+        .negative { background-color: lightcoral; }
+    </style>
+</head>
+<body>
+    <h1>Stock Volume Dashboard</h1>
+
+    <!-- Form to Add New Stocks -->
+    <form method="POST" action="/">
+        <label for="symbol">Add Stock Symbol:</label>
+        <input type="text" id="symbol" name="symbol" required>
+        <button type="submit">Add</button>
+    </form>
+
+    <!-- Data Table -->
+    <table border="1">
+        <tr>
+            <th>Stock</th>
+            <th>Recent Volume</th>
+            <th>Avg Volume</th>
+            <th>Comparison (%)</th>
+        </tr>
+        {% for row in data %}
+        <tr class="{{ 'positive' if row.comparison > 0 else 'negative' }}">
+            <td>{{ row.symbol }}</td>
+            <td>{{ row.recent_volume }}</td>
+            <td>{{ row.avg_volume }}</td>
+            <td>{{ "%.2f" % row.comparison }}%</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Dynamic Chart -->
+    <h2>Volume Comparison Chart</h2>
+    <canvas id="volumeChart"></canvas>
+    <script>
+        const ctx = document.getElementById('volumeChart').getContext('2d');
+        const data = {
+            labels: [{% for row in data %} "{{ row.symbol }}", {% endfor %}],
+            datasets: [{
+                label: 'Comparison (%)',
+                data: [{% for row in data %} {{ "%.2f" % row.comparison }}, {% endfor %}],
+                backgroundColor: [{% for row in data %}
+                    "{{ 'lightgreen' if row.comparison > 0 else 'lightcoral' }}",
+                {% endfor %}]
+            }]
+        };
+
+        const config = {
+            type: 'bar',
+            data: data,
+            options: {
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        };
+
+        new Chart(ctx, config);
+    </script>
+</body>
+</html>
